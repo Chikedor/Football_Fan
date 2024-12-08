@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 import { PreferencesForm } from './components/PreferencesForm';
 import { TeamSelector } from './components/TeamSelector';
@@ -39,55 +40,79 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-600 text-white p-6 shadow-lg">
-        <div className="container mx-auto">
-          <h1 className="text-3xl font-bold flex items-center">
-            LaLiga Tracker
-          </h1>
-          <p className="mt-2 text-blue-100">Mantente al día con tu equipo favorito de fútbol</p>
-        </div>
-      </header>
-
-      <main className="container mx-auto py-8 px-4">
-        {!selectedTeam ? (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-semibold text-gray-800">Selecciona tu equipo:</h2>
-            <TeamSelector onSelectTeam={setSelectedTeam} />
+    <Router>
+      <div className="min-h-screen bg-gray-100">
+        <header className="bg-blue-600 text-white p-6 shadow-lg">
+          <div className="container mx-auto">
+            <h1 className="text-3xl font-bold flex items-center">
+              LaLiga Tracker
+            </h1>
+            <p className="mt-2 text-blue-100">Mantente al día con tu equipo favorito de fútbol</p>
           </div>
-        ) : (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={selectedTeam.logo}
-                  alt={`${selectedTeam.name} logo`}
-                  className="w-16 h-16 object-contain"
-                />
-                <h2 className="text-2xl font-semibold text-gray-800">{selectedTeam.name}</h2>
+        </header>
+
+        <nav className="main-nav bg-blue-600 text-white p-4 shadow-lg">
+          <div className="container mx-auto">
+            <ul>
+              <li>
+                <Link to="/">Equipos</Link>
+              </li>
+              <li>
+                <Link to="/timeline">Timeline</Link>
+              </li>
+              <li>
+                <Link to="/preferences">Preferencias</Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <main className="container mx-auto py-8 px-4">
+          <Routes>
+            <Route path="/" element={
+              <TeamSelector
+                selectedTeam={selectedTeam}
+                onTeamSelect={setSelectedTeam}
+              />
+            } />
+            <Route path="/timeline" element={
+              <div className="space-y-8">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    {selectedTeam && (
+                      <img
+                        src={selectedTeam.logo}
+                        alt={`${selectedTeam.name} logo`}
+                        className="w-16 h-16 object-contain"
+                      />
+                    )}
+                    <h2 className="text-2xl font-semibold text-gray-800">{selectedTeam ? selectedTeam.name : 'Tu equipo'}</h2>
+                  </div>
+                  {selectedTeam && (
+                    <button
+                      onClick={() => setSelectedTeam(null)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Cambiar equipo
+                    </button>
+                  )}
+                </div>
+
+                <Timeline items={timelineItems} />
               </div>
-              <button
-                onClick={() => setSelectedTeam(null)}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                Cambiar equipo
-              </button>
-            </div>
-
-            <PreferencesForm
-              notifications={notifications}
-              content={content}
-              onNotificationChange={setNotifications}
-              onContentChange={setContent}
-            />
-            <div className="mt-8">
-              <h2 className="text-2xl font-bold mb-4">Tu Timeline</h2>
-              <Timeline items={timelineItems} />
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
+            } />
+            <Route path="/preferences" element={
+              <PreferencesForm
+                notifications={notifications}
+                content={content}
+                onNotificationsChange={setNotifications}
+                onContentChange={setContent}
+              />
+            } />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 
